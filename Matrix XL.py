@@ -4,10 +4,9 @@ from openpyxl.styles import NamedStyle, Border, Side, Font, GradientFill, Alignm
 from openpyxl.writer.excel import save_workbook
 import pandas as pd
 import easygui
-import statistics
-import datetime
-import calendar
 import xlsxwriter
+import copy # For copying nested dictionaries
+import datetime as DT # For make a list of dates
 
 
 filename_poteri=easygui.fileopenbox()
@@ -26,6 +25,8 @@ monthName=month_list[monthNum]
 period=str(monthName+' 20'+year)
 
 bdList = []
+
+
 nameList = []
 # Генератор вложенных списков
 # Lists for prices
@@ -38,7 +39,7 @@ def listCor(x,y,z): # Prices list editing
 
 rowP = 9
 for i in range(25):
-    bd = sh1.cell(row=rowP, column=1).value
+    bd = str(sh1.cell(row=rowP, column=1).value)
     name = sh1.cell(row=rowP, column=2).value
     bdList.append(bd)
     nameList.append(name)
@@ -56,31 +57,32 @@ commList = dict(zip(bdList, nameList))
 wb1.save(str(filename_poteri + '.xlsx'))
 wb1.close()
 os.remove(filename_poteri+".xlsx")
-
+"""
 #===============================================================
 
 filename_matrix=easygui.fileopenbox()
 df2 = pd.read_excel(filename_matrix, header=None)
-df2.to_excel(filename_matrix + '.xlsx', index=False, header=False)
-wb2 = openpyxl.load_workbook(filename_matrix + '.xlsx')
+df2.to_excel(filename_matrix + 'M.xlsx', index=False, header=False)
+wb2 = openpyxl.load_workbook(filename_matrix + 'M.xlsx')
 sh2 = wb2.active
 listLen = sh2.max_row
 
-branchList = ['Б33', 'БД1', 'БД3', 'БД4']
-bdDict = {}
-for i in bdList:
-    for j in branchList:
-        bdDict[i]=j
+bdList2 = bdList[:]
+bdDict = dict.fromkeys(bdList2, 0)
 
-# bdDict = dict(bdList, dict(branchList))
+for i in bdList2:
+    bdDict[i] = dict()
+    bdDict[i]['Б33'] = []
+    bdDict[i]['БД1'] = []
+    bdDict[i]['БД3'] = []
+    bdDict[i]['БД4'] = []
 
-"""
 def matrixData(w,x,y,z): # Prices list editing
     bdDict[w][x].insert(y,z)
 
-for i in bdList:
+for i in bdList2:
     for j in range(1, listLen):
-        if i == sh2.cell(row=j, column=1).value:
+        if i == str(sh2.cell(row=j, column=1).value):
             m_b33 = sh2.cell(row=j, column=24).value
             m_bd1 = sh2.cell(row=j, column=38).value
             m_bd3 = sh2.cell(row=j, column=66).value
@@ -106,44 +108,72 @@ for i in bdList:
             matrixData(i, 'БД4', 1, sr_pr_bd4)
             matrixData(i, 'БД4', 2, dolya_bd4)
 
-
-# bdDict = {'Б33':[100, 20, 2, 0.45], 'БД1':[90, 15, 1, 0.35], 'БД3':[110, 25, 3, 0.45]}
-
-# df=pd.read_excel(filename_matrix, header=None)
-# df.to_excel(filename_matrix+'.xlsx', index=False, header=False)
-# filename_base=list(filename_matrix)
-#
-# wbm1=xlrd.open_workbook(filename_matrix, formatting_info=True)
-# sh_m1elete_rows(1, amount=8)
-# os.remove(filename_+'.xlsx')
-
-
-# Identifying period (month, year)
-# period=list(sh_m1['A5'].value)
-# month01=period[17]
-# month02=period[18]
-# month_num=month01+month02
-# year01=period[20]
-# year02=period[21]
-# year='20'+year01+year02
-# month_list={'01':'Январь', '02':'Февраль', '03':'Март', '04':'Апрель', '05':'Май', '06':'Июнь', '07':'Июль', '08':'Август', '09':'Сентябрь', '10':'Октябрь', '11':'Ноябрь', '12':'Декабрь'}
-# month_name=month_list[month_num]
-# Продумать имя файла здесь
-# filename_matrix2=str(filename_matrix+month_name+' '+year+'.xlsx')
-# wbm2=xlsxwriter.Workbook(filename_matrix2)
-# wbm2.close()
-#
-# wbm2 = openpyxl.load_workbook(filename_matrix2)
-# sh_m2 = wbm2.worksheets[0]
-# #
-# sh_m1.delete_rows(1, amount=8)
-
-# ro=1
-# for i in range(1, 4):
-# sh_m.cell(1,1).EntireRow.Delete()
-
-# wbm2.save(str(filename_matrix2))
-
-dicti = {'Б33':[100, 20, 2, 0.45], 'БД1':[90, 15, 1, 0.35], 'БД3':[110, 25, 3, 0.45]}
+wb2.close()
+os.remove(filename_matrix + 'M.xlsx')
 
 """
+# =========================================================================
+
+
+filename_ved1=easygui.fileopenbox()
+df3 = pd.read_excel(filename_ved1, header=None)
+df3.to_excel(filename_ved1 + 'V1.xlsx', index=False, header=False)
+wbv1 = openpyxl.load_workbook(filename_ved1 + 'V1.xlsx')
+sh_v1 = wbv1.active
+listLen_v1 = sh_v1.max_row
+
+# Identifying period (month, year)
+dateCell2=str(sh_v1['A5'].value)
+
+startD = int(dateCell2[2:4])
+startM = int(dateCell2[5:7])
+startY = 2000 + int(dateCell2[8:10])
+endD = int(dateCell2[14:16])
+endM = int(dateCell2[17:19])
+endY = 2000 + int(dateCell2[20:])
+
+startDate = DT.datetime(startY, startM, startD)
+endDate = DT.datetime(endY, endM, endD)
+res = pd.date_range( # Creating a list of dates of the year's period
+    min(startDate, endDate),
+    max(startDate, endDate)
+).strftime('%d.%m.%y').tolist()
+
+bdList3 = bdList[:]
+data_stockDict = dict.fromkeys(bdList3, 0)
+
+rowV = 8
+for i in range(8, listLen_v1):
+    dateList = []
+    stockList = []
+    init_stock = sh_v1.cell(row=i, column=5).value
+    bd_d = str(sh_v1.cell(row=i, column=1).value)
+    if init_stock != None:
+        data_stockDict[bd_d][res(0)] = init_stock
+    else:
+        for k in res:
+            if k != bd_d:
+                data_stockDict[bd_d][k] = init_stock # Is it correct?
+            else:
+                pr = sh_v1.cell(row=i, column=6).value
+                ras = sh_v1.cell(row=i, column=7).value
+                data_stockDict[bd_d][k] = init_stock + pr - ras
+
+
+
+
+
+
+
+
+# for i in bdList3:
+#     dataDict[i] = {}
+#     bdDict[i]['Б33'] = []
+#     bdDict[i]['БД1'] = []
+#     bdDict[i]['БД3'] = []
+#     bdDict[i]['БД4'] = []
+
+
+wbv1.close()
+os.remove(filename_ved1 + 'V1.xlsx')
+
