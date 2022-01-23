@@ -134,7 +134,7 @@ endY = 2000 + int(dateCell2[20:])
 
 startDate = DT.datetime(startY, startM, startD)
 endDate = DT.datetime(endY, endM, endD)
-res = pd.date_range( # Creating a list of dates of the year's period
+yeda = pd.date_range( # Creating a list of dates of the year's period
     min(startDate, endDate),
     max(startDate, endDate)
 ).strftime('%d.%m.%y').tolist()
@@ -142,27 +142,42 @@ res = pd.date_range( # Creating a list of dates of the year's period
 bdList3 = bdList[:]
 data_stockDict = dict.fromkeys(bdList3, 0)
 
-rowV = 8
+yeda_c = 0 # Counter for dates of the year
+stock = 0 # Qty
 for i in range(8, listLen_v1):
-    dateList = []
-    stockList = []
+
     init_stock = sh_v1.cell(row=i, column=5).value
+    if init_stock == ' ':
+        init_stock = 0
     bd_d = str(sh_v1.cell(row=i, column=1).value)
-    if init_stock != None:
-        data_stockDict[bd_d][res(0)] = init_stock
+
+    if '.' not in bd_d:
+        yeda_c = 0
+        kod = str(sh_v1.cell(row=i, column=1).value)
+        data_stockDict[kod] = {}
+        stock = init_stock
+        # dt = yeda
+        data_stockDict[kod][yeda[yeda_c]] = stock
+        yeda_c += 1
     else:
-        for k in res:
+        for k in yeda[yeda_c:]:
             if k != bd_d:
-                data_stockDict[bd_d][k] = init_stock # Is it correct?
+                data_stockDict[kod][k] = stock
+                yeda_c += 1
             else:
                 pr = sh_v1.cell(row=i, column=6).value
+                if pr == ' ':
+                    pr = 0
                 ras = sh_v1.cell(row=i, column=7).value
-                data_stockDict[bd_d][k] = init_stock + pr - ras
+                if ras == ' ':
+                    ras = 0
+                data_stockDict[kod][k] = stock + pr - ras
+                yeda_c += 1
 
 
 
-
-
+df4 = pd.DataFrame(data_stockDict)
+df4.to_excel('Остатки.xlsx', index=False, header=False)
 
 
 
