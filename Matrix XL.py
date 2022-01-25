@@ -56,8 +56,8 @@ commList = dict(zip(bdList, nameList))
 wb1.save(str(filename_poteri + '.xlsx'))
 wb1.close()
 os.remove(filename_poteri+".xlsx")
-"""
-#===============================================================
+
+# +++++++++++++++++++++++++++++++ Matrix file +++++++++++++++++++++++++++++++
 
 filename_matrix=easygui.fileopenbox()
 df2 = pd.read_excel(filename_matrix, header=None)
@@ -110,8 +110,8 @@ for i in bdList2:
 wb2.close()
 os.remove(filename_matrix + 'M.xlsx')
 
-"""
-# =============================== B33 ==========================================
+
+# +++++++++++++++++++++++++++++++ B33 +++++++++++++++++++++++++++++++
 
 filename_ved1=easygui.fileopenbox()
 df3 = pd.read_excel(filename_ved1, header=None)
@@ -140,7 +140,8 @@ yeda = pd.date_range( # Creating a list of dates of the year's period
 bdList3 = bdList[:]
 stockDict_B33 = dict.fromkeys(bdList3, 0)
 
-def yearloop(yc, kd, st): # Function that puts current value to the end of the list
+
+def yearloopB33(yc, kd, st): # Function that puts current value to the end of the list
     for y in yeda[yc:]:
         stockDict_B33[kd][yeda[yc]] = st
         yc +=1
@@ -148,8 +149,13 @@ def yearloop(yc, kd, st): # Function that puts current value to the end of the l
 
 yeda_c = 0 # Counter for dates of the year
 stock = 0 # Qty
-for i in range(8, listLen_v1):
 
+for b in bdList3:  # Putting initial zeros for all bd's
+    stockDict_B33[b] = {}
+    yearloopB33(yeda_c, b, stock)
+yeda_c = 0
+
+for i in range(8, listLen_v1):
     init_stock = sh_v1.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
@@ -158,25 +164,20 @@ for i in range(8, listLen_v1):
     if '.' not in bd_d:
         yeda_c = 0
         kod = str(sh_v1.cell(row=i, column=1).value)
-        stockDict_B33[kod] = {}
+        # stockDict_B33[kod] = {}
         stock = init_stock
-        yearloop(yeda_c, kod, stock)
+        yearloopB33(yeda_c, kod, stock)
     else:
         stock = sh_v1.cell(row=i, column=8).value
         if stock == ' ':
             stock = 0
         date_index = yeda.index(bd_d)
-        yearloop(date_index, kod, stock)
-
-"""
-df4 = pd.DataFrame(stockDict_B33)
-df4.to_excel('Остатки.xlsx', index=False, header=False)
-"""
+        yearloopB33(date_index, kod, stock)
 
 wbv1.close()
 os.remove(filename_ved1 + 'V1.xlsx')
 
-# =============================== BD 1 ====================================
+# +++++++++++++++++++++++++++++++ BD 1 +++++++++++++++++++++++++++++++
 
 filename_ved2=easygui.fileopenbox()
 df3 = pd.read_excel(filename_ved2, header=None)
@@ -194,18 +195,19 @@ startY = 2000 + int(dateCell2[8:10])
 endD = int(dateCell2[14:16])
 endM = int(dateCell2[17:19])
 endY = 2000 + int(dateCell2[20:])
-
+"""
 startDate = DT.datetime(startY, startM, startD)
 endDate = DT.datetime(endY, endM, endD)
 yeda = pd.date_range( # Creating a list of dates of the year's period
     min(startDate, endDate),
     max(startDate, endDate)
 ).strftime('%d.%m.%y').tolist()
-
+"""
 bdList4 = bdList[:]
 stockDict_BD1 = dict.fromkeys(bdList4, 0)
 
-def yearloop(yc, kd, st): # Function that puts current value to the end of the list
+def yearloopBD1(yc, kd, st): # Function that puts current value to the end of the list
+    stockDict_BD1[kd] = {}
     for y in yeda[yc:]:
         stockDict_BD1[kd][yeda[yc]] = st
         yc +=1
@@ -213,8 +215,19 @@ def yearloop(yc, kd, st): # Function that puts current value to the end of the l
 
 yeda_c = 0 # Counter for dates of the year
 stock = 0 # Qty
-for i in range(8, listLen_v1):
 
+
+for f in range(8, listLen_v2):
+    fstColBD1 = []
+    fC = str(sh_v2.cell(row=f, column=1).value) # This module processes bd's which are not in xl file
+    fstColBD1.append(fC)
+for b in bdList4:
+    if b not in fstColBD1:
+        yearloopBD1(yeda_c, b, stock)
+yeda_c = 0
+
+
+for i in range(8, listLen_v2):
     init_stock = sh_v2.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
@@ -223,25 +236,20 @@ for i in range(8, listLen_v1):
     if '.' not in bd_d:
         yeda_c = 0
         kod = str(sh_v2.cell(row=i, column=1).value)
-        stockDict_BD1[kod] = {}
+        # stockDict_BD1[kod] = {}
         stock = init_stock
-        yearloop(yeda_c, kod, stock)
+        yearloopBD1(yeda_c, kod, stock)
     else:
         stock = sh_v2.cell(row=i, column=8).value
         if stock == ' ':
             stock = 0
         date_index = yeda.index(bd_d)
-        yearloop(date_index, kod, stock)
-
-"""
-df4 = pd.DataFrame(stockDict_B33)
-df4.to_excel('Остатки.xlsx', index=False, header=False)
-"""
+        yearloopBD1(date_index, kod, stock)
 
 wbv2.close()
 os.remove(filename_ved2 + 'V2.xlsx')
 
-# =============================== BD3 ===============================
+# +++++++++++++++++++++++++++++++ BD3 +++++++++++++++++++++++++++++++
 
 
 filename_ved3=easygui.fileopenbox()
@@ -260,18 +268,19 @@ startY = 2000 + int(dateCell2[8:10])
 endD = int(dateCell2[14:16])
 endM = int(dateCell2[17:19])
 endY = 2000 + int(dateCell2[20:])
-
+"""
 startDate = DT.datetime(startY, startM, startD)
 endDate = DT.datetime(endY, endM, endD)
 yeda = pd.date_range( # Creating a list of dates of the year's period
     min(startDate, endDate),
     max(startDate, endDate)
 ).strftime('%d.%m.%y').tolist()
-
+"""
 bdList5 = bdList[:]
 stockDict_BD3 = dict.fromkeys(bdList5, 0)
 
-def yearloop(yc, kd, st): # Function that puts current value to the end of the list
+def yearloopBD3(yc, kd, st): # Function that puts current value to the end of the list
+    stockDict_BD3[kd] = {}
     for y in yeda[yc:]:
         stockDict_BD3[kd][yeda[yc]] = st
         yc +=1
@@ -279,8 +288,17 @@ def yearloop(yc, kd, st): # Function that puts current value to the end of the l
 
 yeda_c = 0 # Counter for dates of the year
 stock = 0 # Qty
-for i in range(8, listLen_v1):
 
+for f in range(8, listLen_v3):
+    fstColBD3 = []
+    fC = str(sh_v3.cell(row=f, column=1).value) # This module processes bd's which are not in xl file
+    fstColBD3.append(fC)
+for b in bdList5:
+    if b not in fstColBD3:
+        yearloopBD3(yeda_c, b, stock)
+yeda_c = 0
+
+for i in range(8, listLen_v3):
     init_stock = sh_v3.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
@@ -289,25 +307,20 @@ for i in range(8, listLen_v1):
     if '.' not in bd_d:
         yeda_c = 0
         kod = str(sh_v3.cell(row=i, column=1).value)
-        stockDict_BD3[kod] = {}
+        # stockDict_BD3[kod] = {}
         stock = init_stock
-        yearloop(yeda_c, kod, stock)
+        yearloopBD3(yeda_c, kod, stock)
     else:
         stock = sh_v3.cell(row=i, column=8).value
         if stock == ' ':
             stock = 0
         date_index = yeda.index(bd_d)
-        yearloop(date_index, kod, stock)
-
-"""
-df4 = pd.DataFrame(stockDict_B33)
-df4.to_excel('Остатки.xlsx', index=False, header=False)
-"""
+        yearloopBD3(date_index, kod, stock)
 
 wbv3.close()
 os.remove(filename_ved3 + 'V3.xlsx')
 
-# =============================== BD4 ===============================
+# +++++++++++++++++++++++++++++++ BD4 ++++++++++++++++++++++++++++++++
 
 filename_ved4=easygui.fileopenbox()
 df3 = pd.read_excel(filename_ved4, header=None)
@@ -325,18 +338,19 @@ startY = 2000 + int(dateCell2[8:10])
 endD = int(dateCell2[14:16])
 endM = int(dateCell2[17:19])
 endY = 2000 + int(dateCell2[20:])
-
+"""
 startDate = DT.datetime(startY, startM, startD)
 endDate = DT.datetime(endY, endM, endD)
 yeda = pd.date_range( # Creating a list of dates of the year's period
     min(startDate, endDate),
     max(startDate, endDate)
 ).strftime('%d.%m.%y').tolist()
+"""
+bdList6 = bdList[:]
+stockDict_BD4 = dict.fromkeys(bdList6, 0)
 
-bdList5 = bdList[:]
-stockDict_BD4 = dict.fromkeys(bdList5, 0)
-
-def yearloop(yc, kd, st): # Function that puts current value to the end of the list
+def yearloopBD4(yc, kd, st): # Function that puts current value to the end of the list
+    stockDict_BD4[kd] = {}
     for y in yeda[yc:]:
         stockDict_BD4[kd][yeda[yc]] = st
         yc +=1
@@ -344,8 +358,17 @@ def yearloop(yc, kd, st): # Function that puts current value to the end of the l
 
 yeda_c = 0 # Counter for dates of the year
 stock = 0 # Qty
-for i in range(8, listLen_v1):
 
+for f in range(8, listLen_v4):
+    fstColBD4 = []
+    fC = str(sh_v3.cell(row=f, column=1).value) # This module processes bd's which are not in xl file
+    fstColBD4.append(fC)
+for b in bdList6:
+    if b not in fstColBD4:
+        yearloopBD4(yeda_c, b, stock)
+yeda_c = 0
+
+for i in range(8, listLen_v4):
     init_stock = sh_v4.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
@@ -354,23 +377,64 @@ for i in range(8, listLen_v1):
     if '.' not in bd_d:
         yeda_c = 0
         kod = str(sh_v4.cell(row=i, column=1).value)
-        stockDict_BD4[kod] = {}
+        # stockDict_BD4[kod] = {}
         stock = init_stock
-        yearloop(yeda_c, kod, stock)
+        yearloopBD4(yeda_c, kod, stock)
     else:
         stock = sh_v4.cell(row=i, column=8).value
         if stock == ' ':
             stock = 0
         date_index = yeda.index(bd_d)
-        yearloop(date_index, kod, stock)
-
-"""
-df4 = pd.DataFrame(stockDict_B33)
-df4.to_excel('Остатки.xlsx', index=False, header=False)
-"""
+        yearloopBD4(date_index, kod, stock)
 
 wbv4.close()
 os.remove(filename_ved4 + 'V4.xlsx')
 
 
-# ДАЛЕЕ НАДО ЭКСПОРТИРОВАТЬ ДАННЫЕ ПО ПЕРВОМУ СПИСКУ БДШЕК
+# ============================== Exporting ========================
+wbm = openpyxl.load_workbook(easygui.fileopenbox())
+
+# Making a list of sheets in the dashboard file
+sheetListName = 'Data'
+sheetListNum = [x for x in range(1, 26)]
+sheetList = []
+for j in sheetListNum:
+    sheetList.append(sheetListName + str(j))
+
+# Exporting data
+for sh_m in sheetList:
+    sh_dash = wbm[sh_m]
+
+    for i in bdList:
+        for j in yeda:
+            row = 11
+            sh_dash.cell(row=row, column=1).value = j # Dates
+
+            if i not in stockDict_B33.keys():
+                st = 0
+            else:
+                st = stockDict_B33[i][j]
+            sh_dash.cell(row=row, column=7).value = st
+            sh_dash.cell(row=row, column=8).value =  bdDict[i]['Б33'][0]
+
+            if i not in stockDict_BD1.keys():
+                st = 0
+            else:
+                st = stockDict_BD1[i][j]
+            sh_dash.cell(row=row, column=9).value = st
+            sh_dash.cell(row=row, column=10).value =  bdDict[i]['БД1'][0]
+
+            if i not in stockDict_BD3.keys():
+                st = 0
+            else:
+                st = stockDict_BD3[i][j]
+            sh_dash.cell(row=row, column=11).value = st
+            sh_dash.cell(row=row, column=12).value =  bdDict[i]['БД3'][0]
+
+            if i not in stockDict_BD4.keys():
+                st = 0
+            else:
+                st = stockDict_BD4[i][j]
+            sh_dash.cell(row=row, column=13).value = st
+            sh_dash.cell(row=row, column=14).value =  bdDict[i]['БД4'][0]
+
