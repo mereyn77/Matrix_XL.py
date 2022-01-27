@@ -406,41 +406,41 @@ for i in bdList:
     sh_dash.cell(row=1, column=2).value = i
     sh_dash.cell(row=2, column=2).value = commList[i]
     sh_dash.cell(row=5, column=11).value = bdDict[i]['Б33'][2]
-    sh_dash.cell(row=5, column=11).value = bdDict[i]['БД1'][2]
-    sh_dash.cell(row=5, column=11).value = bdDict[i]['БД3'][2]
-    sh_dash.cell(row=5, column=11).value = bdDict[i]['БД4'][2]
-
+    sh_dash.cell(row=5, column=12).value = bdDict[i]['БД1'][2]
+    sh_dash.cell(row=5, column=13).value = bdDict[i]['БД3'][2]
+    sh_dash.cell(row=5, column=14).value = bdDict[i]['БД4'][2]
+    row = 11
+    
     for j in yeda:
-        row = 11
-        sh_dash.cell(row=row, column=1).value = j # Dates
+        sh_dash.cell(row=row, column=6).value = j[:6] + '20' + j[6:]
 
         if i not in stockDict_B33.keys():  # this 'if' has to go bc it makes no sense since I have included all bds in all dicts.
             st = 0
         else:
             st = stockDict_B33[i][j]
         sh_dash.cell(row=row, column=7).value = st
-        sh_dash.cell(row=row, column=8).value =  bdDict[i]['Б33'][0]
+        sh_dash.cell(row=row, column=8).value = bdDict[i]['Б33'][0]
 
         if i not in stockDict_BD1.keys():
             st = 0
         else:
             st = stockDict_BD1[i][j]
         sh_dash.cell(row=row, column=9).value = st
-        sh_dash.cell(row=row, column=10).value =  bdDict[i]['БД1'][0]
+        sh_dash.cell(row=row, column=10).value = bdDict[i]['БД1'][0]
 
         if i not in stockDict_BD3.keys():
             st = 0
         else:
             st = stockDict_BD3[i][j]
         sh_dash.cell(row=row, column=11).value = st
-        sh_dash.cell(row=row, column=12).value =  bdDict[i]['БД3'][0]
+        sh_dash.cell(row=row, column=12).value = bdDict[i]['БД3'][0]
 
         if i not in stockDict_BD4.keys():
             st = 0
         else:
             st = stockDict_BD4[i][j]
         sh_dash.cell(row=row, column=13).value = st
-        sh_dash.cell(row=row, column=14).value =  bdDict[i]['БД4'][0]
+        sh_dash.cell(row=row, column=14).value = bdDict[i]['БД4'][0]
         row += 1
     sh_c += 1
 wbm.save(dashboardFile)
