@@ -403,12 +403,18 @@ for j in sheetListNum:
 sh_c = 0
 for i in bdList:
     sh_dash = wbm[sheetList[sh_c]]
+    sh_dash.cell(row=1, column=2).value = i
+    sh_dash.cell(row=2, column=2).value = commList[i]
+    sh_dash.cell(row=5, column=11).value = bdDict[i]['Б33'][2]
+    sh_dash.cell(row=5, column=11).value = bdDict[i]['БД1'][2]
+    sh_dash.cell(row=5, column=11).value = bdDict[i]['БД3'][2]
+    sh_dash.cell(row=5, column=11).value = bdDict[i]['БД4'][2]
 
     for j in yeda:
         row = 11
         sh_dash.cell(row=row, column=1).value = j # Dates
 
-        if i not in stockDict_B33.keys():
+        if i not in stockDict_B33.keys():  # this 'if' has to go bc it makes no sense since I have included all bds in all dicts.
             st = 0
         else:
             st = stockDict_B33[i][j]
