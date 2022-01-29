@@ -1,13 +1,20 @@
+# Данная программа предназначена для анализа поддержания товарных остатков относительно матрицы
+# Для корректной работы этой программы требуются следующие файлы:
+#    Потери при несоблюдении 30% матрицы за отчетный месяц
+#    Планирование + матрица по 25 первым позициям из первого файла
+#    Ведомость по остатка (НЕкомплексная) отдельно по 4 филиалам (4 файла)
+#    Файл Data1.xlsx для выгрузки полученных данных и загрузки их в дашборд
+
 import os
 import openpyxl
 from openpyxl.styles import NamedStyle, Border, Side, Font, GradientFill, Alignment, PatternFill, Color
 from openpyxl.writer.excel import save_workbook
 import pandas as pd
 import easygui
-import xlsxwriter
+# import xlsxwriter
 import copy # For copying nested dictionaries
 import datetime as DT # For make a list of dates
-
+import xlwings as xw
 
 filename_poteri=easygui.fileopenbox()
 df1 = pd.read_excel(filename_poteri, header=None)
@@ -388,60 +395,68 @@ os.remove(filename_ved4 + 'V4.xlsx')
 
 
 # ============================== Exporting ========================
-dashboardFile = easygui.fileopenbox()
+
+# wbm = xw.Book('Дашборд Матрица 2.xlsx')
+# sh_dash = wbm.sheets['Лист1']
+
+dashboardFile = "Data1.xlsx"
 wbm = openpyxl.load_workbook(dashboardFile)
+sh_dash = wbm.active
+# dashboardFile = open('Дашборд Матрица 22.xlsx', 'a')
 
 # Making a list of sheets in the dashboard file
-sheetListName = 'Data'
-sheetListNum = [x for x in range(1, 26)]
-sheetList = []
-for j in sheetListNum:
-    sheetList.append(sheetListName + str(j))
+
+
 
 # Exporting data
 
-sh_c = 0
+col = 7
 for i in bdList:
-    sh_dash = wbm[sheetList[sh_c]]
-    sh_dash.cell(row=1, column=2).value = i
-    sh_dash.cell(row=2, column=2).value = commList[i]
-    sh_dash.cell(row=5, column=11).value = bdDict[i]['Б33'][2]
-    sh_dash.cell(row=5, column=12).value = bdDict[i]['БД1'][2]
-    sh_dash.cell(row=5, column=13).value = bdDict[i]['БД3'][2]
-    sh_dash.cell(row=5, column=14).value = bdDict[i]['БД4'][2]
-    row = 11
-    
-    for j in yeda:
-        sh_dash.cell(row=row, column=6).value = j[:6] + '20' + j[6:]
+    r = 1
+    sh_dash.cell(row=1, column=col+1).value = i
+    sh_dash.cell(row=1, column=col+3).value = commList[i]
+    sh_dash.cell(row=6, column=col).value = bdDict[i]['Б33'][2]
+    sh_dash.cell(row=6, column=col+2).value = bdDict[i]['БД1'][2]
+    sh_dash.cell(row=6, column=col+4).value = bdDict[i]['БД3'][2]
+    sh_dash.cell(row=6, column=col+6).value = bdDict[i]['БД4'][2]
+    col += 10
 
-        if i not in stockDict_B33.keys():  # this 'if' has to go bc it makes no sense since I have included all bds in all dicts.
+
+col = 7
+for i in bdList:
+    row = 10
+    for j in yeda:
+        sh_dash.cell(row=row, column=1).value = j[:6] + '20' + j[6:]
+
+        if stockDict_B33[i][j] == None:
             st = 0
         else:
             st = stockDict_B33[i][j]
-        sh_dash.cell(row=row, column=7).value = st
-        sh_dash.cell(row=row, column=8).value = bdDict[i]['Б33'][0]
+        sh_dash.cell(row=row, column=col).value = st
+        sh_dash.cell(row=row, column=col+1).value = bdDict[i]['Б33'][0]
 
-        if i not in stockDict_BD1.keys():
+        if stockDict_BD1[i][j] == None:
             st = 0
         else:
             st = stockDict_BD1[i][j]
-        sh_dash.cell(row=row, column=9).value = st
-        sh_dash.cell(row=row, column=10).value = bdDict[i]['БД1'][0]
+        sh_dash.cell(row=row, column=col+2).value = st
+        sh_dash.cell(row=row, column=col+3).value = bdDict[i]['БД1'][0]
 
-        if i not in stockDict_BD3.keys():
+        if stockDict_BD3[i][j] == None:
             st = 0
         else:
             st = stockDict_BD3[i][j]
-        sh_dash.cell(row=row, column=11).value = st
-        sh_dash.cell(row=row, column=12).value = bdDict[i]['БД3'][0]
+        sh_dash.cell(row=row, column=col+4).value = st
+        sh_dash.cell(row=row, column=col+5).value = bdDict[i]['БД3'][0]
 
-        if i not in stockDict_BD4.keys():
+        if stockDict_BD4[i][j] == None:
             st = 0
         else:
             st = stockDict_BD4[i][j]
-        sh_dash.cell(row=row, column=13).value = st
-        sh_dash.cell(row=row, column=14).value = bdDict[i]['БД4'][0]
+        sh_dash.cell(row=row, column=col+6).value = st
+        sh_dash.cell(row=row, column=col+7).value = bdDict[i]['БД4'][0]
         row += 1
-    sh_c += 1
-wbm.save(dashboardFile)
+    col += 10
+
+wbm.save('Data1.xlsx')
 wbm.close()
