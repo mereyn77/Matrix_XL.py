@@ -473,15 +473,18 @@ for i in bdList:
 col = 7
 for i in bdList:
     row = 10
+    row2 = 400
     for j in yeda:
         sh_dash.cell(row=row, column=1).value = j[:6] + '20' + j[6:]
+        sh_dash.cell(row=row2, column=1).value = j[:6] + '20' + j[6:]
 
         if stockDict_B33[i][j] == None:
             st = 0
         else:
             st = stockDict_B33[i][j]
-        sh_dash.cell(row=row, column=col).value = st
-        sh_dash.cell(row=row, column=col+1).value = bdDict[i]['Б33'][0]
+        sh_dash.cell(row=row, column=col).value = st # Qty
+        sh_dash.cell(row=row, column=col+1).value = bdDict[i]['Б33'][0] # Matrix value
+        sh_dash.cell(row=row2, column=col).value = prodDict[i]['Б33'][j] # Sales
 
         if stockDict_BD1[i][j] == None:
             st = 0
@@ -489,6 +492,7 @@ for i in bdList:
             st = stockDict_BD1[i][j]
         sh_dash.cell(row=row, column=col+2).value = st
         sh_dash.cell(row=row, column=col+3).value = bdDict[i]['БД1'][0]
+        sh_dash.cell(row=row2, column=col+2).value = prodDict[i]['БД1'][j]  # Sales
 
         if stockDict_BD3[i][j] == None:
             st = 0
@@ -496,6 +500,7 @@ for i in bdList:
             st = stockDict_BD3[i][j]
         sh_dash.cell(row=row, column=col+4).value = st
         sh_dash.cell(row=row, column=col+5).value = bdDict[i]['БД3'][0]
+        sh_dash.cell(row=row2, column=col+4).value = prodDict[i]['БД3'][j]  # Sales
 
         if stockDict_BD4[i][j] == None:
             st = 0
@@ -503,8 +508,13 @@ for i in bdList:
             st = stockDict_BD4[i][j]
         sh_dash.cell(row=row, column=col+6).value = st
         sh_dash.cell(row=row, column=col+7).value = bdDict[i]['БД4'][0]
+        sh_dash.cell(row=row2, column=col+6).value = prodDict[i]['БД4'][j]  # Sales
         row += 1
+        row2 +=1
     col += 10
+
+# ======================= Exporting sales data ==========================
+
 
 wbm.save('Data1.xlsx')
 wbm.close()
