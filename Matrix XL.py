@@ -420,7 +420,7 @@ if an_prodYN == "Да":
             else:
                 pass
         else:
-            if "    " and "." in r:
+            if "    " and "." in r and '№' not in r:
                 sd = r[4:]
                 pcs = sha.cell(row=row, column=4).value
                 prod(bd, br, sd, pcs)
