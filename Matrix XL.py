@@ -275,14 +275,7 @@ startY = 2000 + int(dateCell2[8:10])
 endD = int(dateCell2[14:16])
 endM = int(dateCell2[17:19])
 endY = 2000 + int(dateCell2[20:])
-"""
-startDate = DT.datetime(startY, startM, startD)
-endDate = DT.datetime(endY, endM, endD)
-yeda = pd.date_range( # Creating a list of dates of the year's period
-    min(startDate, endDate),
-    max(startDate, endDate)
-).strftime('%d.%m.%y').tolist()
-"""
+
 bdList5 = bdList[:]
 stockDict_BD3 = dict.fromkeys(bdList5, 0)
 
@@ -343,14 +336,7 @@ startY = 2000 + int(dateCell2[8:10])
 endD = int(dateCell2[14:16])
 endM = int(dateCell2[17:19])
 endY = 2000 + int(dateCell2[20:])
-"""
-startDate = DT.datetime(startY, startM, startD)
-endDate = DT.datetime(endY, endM, endD)
-yeda = pd.date_range( # Creating a list of dates of the year's period
-    min(startDate, endDate),
-    max(startDate, endDate)
-).strftime('%d.%m.%y').tolist()
-"""
+
 bdList6 = bdList[:]
 stockDict_BD4 = dict.fromkeys(bdList6, 0)
 
@@ -392,6 +378,63 @@ for i in range(8, listLen_v4):
 
 wbv4.close()
 os.remove(filename_ved4 + 'V4.xlsx')
+
+
+
+# ++++++++++++++++++++++++++++++++++ Анализ продаж ++++++++++++++++++++++++++++
+an_prodYN=easygui.buttonbox("Нужно ли обработать файл с анализом продаж?", choices=["Да", "Нет"])
+if an_prodYN == "Да":
+    an_prod=easygui.fileopenbox()
+    dfa = pd.read_excel(an_prod, header=None)
+    dfa.to_excel(an_prod + '.xlsx', index=False, header=False)
+    wba = openpyxl.load_workbook(an_prod + '.xlsx')
+    sha = wba.active
+    shaLen = sha.max_row
+
+    bdList7 = bdList[:]
+    branch_names = ['Б33', 'БД1', 'БД3', 'БД4']
+    # prodDict = dict.fromkeys(bdList7, 'Б33', 'БД1', 'БД3', 'БД4')
+
+    # for z in branch_names:  # Putting initial zeros for all bd's
+    #     prodDict[z] = {}
+    #     for c in yeda:
+    #         prodDict[z][c] = 0
+
+    prodDict = dict()  # Putting zero values in all prodDict
+    for z in bdList7:
+        prodDict[z] = dict()
+        for b in branch_names:
+            prodDict[z][b] = dict()
+            for c in yeda:
+                prodDict[z][b][c] = 0
+
+    def prod(a, b, c, d):
+        prodDict[a][b][c] = d
+
+    row = 8
+    for pr in range(8, shaLen):
+        r = str(sha.cell(row=row, column=1).value)
+        if r in bdList7:
+            e = str(sha.cell(row=row+1, column=1).value)
+            if 'Белый дом №1' in e:
+                br = 'БД1'
+            elif 'Белый дом №3' in e:
+                br = 'БД3'
+            elif 'Белый дом №4' in e:
+                br = 'БД4'
+            elif 'БББББ 3333' in e:
+                br = 'Б33'
+            else:
+                brrrr = 0
+        elif r[:1] == ' ':
+            sadeDate = r[1:]
+            prod(r, br, )
+
+
+    else:
+        pass
+
+
 
 
 # ============================== Exporting ========================
