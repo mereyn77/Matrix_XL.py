@@ -414,25 +414,30 @@ if an_prodYN == "Да":
     row = 8
     for pr in range(8, shaLen):
         r = str(sha.cell(row=row, column=1).value)
-        if r in bdList7:
-            e = str(sha.cell(row=row+1, column=1).value)
-            if 'Белый дом №1' in e:
-                br = 'БД1'
-            elif 'Белый дом №3' in e:
-                br = 'БД3'
-            elif 'Белый дом №4' in e:
-                br = 'БД4'
-            elif 'БББББ 3333' in e:
-                br = 'Б33'
+        if " " not in r:
+            if r in bdList7:
+                bd = r
             else:
-                brrrr = 0
-        elif r[:1] == ' ':
-            sadeDate = r[1:]
-            prod(r, br, )
+                pass
+        else:
+            if "    " and "." in r:
+                sd = r[4:]
+                pcs = sha.cell(row=row, column=4).value
+                prod(bd, br, sd, pcs)
+            else:
+                if "  Белый дом №1" in r:
+                    br = 'БД1'
+                elif "  Белый дом №3" in r:
+                    br = 'БД3'
+                elif "  Белый дом №4" in r:
+                    br = 'БД4'
+                elif "(База Беляева)" in r:
+                    br = 'Б33'
+                else:
+                    pass
+        row += 1
 
-
-    else:
-        pass
+    wba.close()    
 
 
 
