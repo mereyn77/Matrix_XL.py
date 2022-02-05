@@ -382,62 +382,62 @@ os.remove(filename_ved4 + 'V4.xlsx')
 
 
 # ++++++++++++++++++++++++++++++++++ Анализ продаж ++++++++++++++++++++++++++++
-an_prodYN=easygui.buttonbox("Нужно ли обработать файл с анализом продаж?", choices=["Да", "Нет"])
-if an_prodYN == "Да":
-    an_prod=easygui.fileopenbox()
-    dfa = pd.read_excel(an_prod, header=None)
-    dfa.to_excel(an_prod + '.xlsx', index=False, header=False)
-    wba = openpyxl.load_workbook(an_prod + '.xlsx')
-    sha = wba.active
-    shaLen = sha.max_row
-
-    bdList7 = bdList[:]
-    branch_names = ['Б33', 'БД1', 'БД3', 'БД4']
-    # prodDict = dict.fromkeys(bdList7, 'Б33', 'БД1', 'БД3', 'БД4')
-
-    # for z in branch_names:  # Putting initial zeros for all bd's
-    #     prodDict[z] = {}
-    #     for c in yeda:
-    #         prodDict[z][c] = 0
-
-    prodDict = dict()  # Putting zero values in all prodDict
-    for z in bdList7:
-        prodDict[z] = dict()
-        for b in branch_names:
-            prodDict[z][b] = dict()
-            for c in yeda:
-                prodDict[z][b][c] = 0
-
-    def prod(a, b, c, d):
-        prodDict[a][b][c] = d
-
-    row = 8
-    for pr in range(8, shaLen):
-        r = str(sha.cell(row=row, column=1).value)
-        if " " not in r:
-            if r in bdList7:
-                bd = r
-            else:
-                pass
-        else:
-            if "    " and "." in r and '№' not in r:
-                sd = r[4:]
-                pcs = sha.cell(row=row, column=4).value
-                prod(bd, br, sd, pcs)
-            else:
-                if "  Белый дом №1" in r:
-                    br = 'БД1'
-                elif "  Белый дом №3" in r:
-                    br = 'БД3'
-                elif "  Белый дом №4" in r:
-                    br = 'БД4'
-                elif "(База Беляева)" in r:
-                    br = 'Б33'
-                else:
-                    pass
-        row += 1
-
-    wba.close()    
+# an_prodYN=easygui.buttonbox("Нужно ли обработать файл с анализом продаж?", choices=["Да", "Нет"])
+# if an_prodYN == "Да":
+#     an_prod=easygui.fileopenbox()
+#     dfa = pd.read_excel(an_prod, header=None)
+#     dfa.to_excel(an_prod + '.xlsx', index=False, header=False)
+#     wba = openpyxl.load_workbook(an_prod + '.xlsx')
+#     sha = wba.active
+#     shaLen = sha.max_row
+#
+#     bdList7 = bdList[:]
+#     branch_names = ['Б33', 'БД1', 'БД3', 'БД4']
+#     # prodDict = dict.fromkeys(bdList7, 'Б33', 'БД1', 'БД3', 'БД4')
+#
+#     # for z in branch_names:  # Putting initial zeros for all bd's
+#     #     prodDict[z] = {}
+#     #     for c in yeda:
+#     #         prodDict[z][c] = 0
+#
+#     prodDict = dict()  # Putting zero values in all prodDict
+#     for z in bdList7:
+#         prodDict[z] = dict()
+#         for b in branch_names:
+#             prodDict[z][b] = dict()
+#             for c in yeda:
+#                 prodDict[z][b][c] = 0
+#
+#     def prod(a, b, c, d):
+#         prodDict[a][b][c] = d
+#
+#     row = 8
+#     for pr in range(8, shaLen):
+#         r = str(sha.cell(row=row, column=1).value)
+#         if " " not in r:
+#             if r in bdList7:
+#                 bd = r
+#             else:
+#                 pass
+#         else:
+#             if "    " and "." in r and '№' not in r:
+#                 sd = r[4:]
+#                 pcs = sha.cell(row=row, column=4).value
+#                 prod(bd, br, sd, pcs)
+#             else:
+#                 if "  Белый дом №1" in r:
+#                     br = 'БД1'
+#                 elif "  Белый дом №3" in r:
+#                     br = 'БД3'
+#                 elif "  Белый дом №4" in r:
+#                     br = 'БД4'
+#                 elif "(База Беляева)" in r:
+#                     br = 'Б33'
+#                 else:
+#                     pass
+#         row += 1
+#
+#     wba.close()
 
 
 
@@ -473,10 +473,10 @@ for i in bdList:
 col = 7
 for i in bdList:
     row = 10
-    row2 = 400
+    # row2 = 400
     for j in yeda:
         sh_dash.cell(row=row, column=1).value = j[:6] + '20' + j[6:]
-        sh_dash.cell(row=row2, column=1).value = j[:6] + '20' + j[6:]
+        # sh_dash.cell(row=row2, column=1).value = j[:6] + '20' + j[6:]
 
         if stockDict_B33[i][j] == None:
             st = 0
@@ -484,7 +484,7 @@ for i in bdList:
             st = stockDict_B33[i][j]
         sh_dash.cell(row=row, column=col).value = st # Qty
         sh_dash.cell(row=row, column=col+1).value = bdDict[i]['Б33'][0] # Matrix value
-        sh_dash.cell(row=row2, column=col).value = prodDict[i]['Б33'][j] # Sales
+        # sh_dash.cell(row=row2, column=col).value = prodDict[i]['Б33'][j] # Sales Анализ продаж пока не нужен (см. выше)
 
         if stockDict_BD1[i][j] == None:
             st = 0
@@ -492,7 +492,8 @@ for i in bdList:
             st = stockDict_BD1[i][j]
         sh_dash.cell(row=row, column=col+2).value = st
         sh_dash.cell(row=row, column=col+3).value = bdDict[i]['БД1'][0]
-        sh_dash.cell(row=row2, column=col+2).value = prodDict[i]['БД1'][j]  # Sales
+        # sh_dash.cell(row=row2, column=col+2).value = prodDict[i]['БД1'][j]  # Sales Анализ продаж пока не нужен (см.
+        # выше)
 
         if stockDict_BD3[i][j] == None:
             st = 0
@@ -500,7 +501,7 @@ for i in bdList:
             st = stockDict_BD3[i][j]
         sh_dash.cell(row=row, column=col+4).value = st
         sh_dash.cell(row=row, column=col+5).value = bdDict[i]['БД3'][0]
-        sh_dash.cell(row=row2, column=col+4).value = prodDict[i]['БД3'][j]  # Sales
+        # sh_dash.cell(row=row2, column=col+4).value = prodDict[i]['БД3'][j]  # Sales Анализ продаж пока не нужен (см. выше)
 
         if stockDict_BD4[i][j] == None:
             st = 0
@@ -508,9 +509,9 @@ for i in bdList:
             st = stockDict_BD4[i][j]
         sh_dash.cell(row=row, column=col+6).value = st
         sh_dash.cell(row=row, column=col+7).value = bdDict[i]['БД4'][0]
-        sh_dash.cell(row=row2, column=col+6).value = prodDict[i]['БД4'][j]  # Sales
+        # sh_dash.cell(row=row2, column=col+6).value = prodDict[i]['БД4'][j]  # Sales Анализ продаж пока не нужен (см. выше)
         row += 1
-        row2 +=1
+        # row2 +=1
     col += 10
 
 # ======================= Exporting sales data ==========================
