@@ -87,7 +87,7 @@ def matrixData(w,x,y,z): # Prices list editing
     bdDict[w][x].insert(y,z)
 
 for i in bdList2:
-    for j in range(1, listLen):
+    for j in range(1, listLen+1):
         if i == str(sh2.cell(row=j, column=1).value):
             m_b33 = sh2.cell(row=j, column=24).value
             m_bd1 = sh2.cell(row=j, column=38).value
