@@ -1,10 +1,14 @@
 # Данная программа предназначена для анализа поддержания товарных остатков относительно матрицы
 # Для корректной работы этой программы требуются следующие файлы:
-#    Потери при несоблюдении 30% матрицы за отчетный месяц
-#    Планирование + матрица по 25 первым позициям из первого файла
-#    Ведомость по остатка (НЕкомплексная) отдельно по 4 филиалам (4 файла)
+#    Потери при несоблюдении 30% матрицы за отчетный месяц. Можно обработать от 1 до 25 позиций.
+#    Планирование + матрица по n первым позициям из первого файла.
+#    Ведомость по остаткам (НЕкомплексная) отдельно по 4 филиалам (4 файла).
 #    Файл Data1.xlsx для выгрузки полученных данных и загрузки их в дашборд
-
+# В ходе работы необходимо указать кол-во обрабатываемых позиций (от 1 до 25) и загрузить файлы в следующем порядке:
+#    Потери, планирование + матрица, вед по остаткам Б33, БД1, БД3, БД4.
+# Результ работы копируется из файла Data1.xlsx в файл с дашбордом по анализу остатков на одноименный лист.
+# На листе Data1 необходимо выбрать столбец с датами и сделать замену всех точек на точки (при выгрузке из программы
+# они неправильно распознаются Exceleм.
 import os
 import openpyxl
 from openpyxl.styles import NamedStyle, Border, Side, Font, GradientFill, Alignment, PatternFill, Color
@@ -16,11 +20,16 @@ import copy # For copying nested dictionaries
 import datetime as DT # For make a list of dates
 import xlwings as xw
 
+itemQty = easygui.integerbox(msg="Сколько позиций необходимо обработать? (Не более 25)", title="Кол-во позиций")
+
 filename_poteri=easygui.fileopenbox()
 df1 = pd.read_excel(filename_poteri, header=None)
 df1.to_excel(filename_poteri + '.xlsx', index=False, header=False)
 wb1 = openpyxl.load_workbook(filename_poteri + '.xlsx')
 sh1 = wb1.active
+listLen_pot = sh1.max_row - 8
+if itemQty > listLen_pot:
+    itemQty = listLen_pot
 
 # Identifying period (month, year)
 dateCell=str(sh1['A5'].value)
@@ -32,11 +41,10 @@ monthName=month_list[monthNum]
 period=str(monthName+' 20'+year)
 
 bdList = []
-
 nameList = []
 # Генератор вложенных списков
 # Lists for prices
-prData = [[0 for x in range(3)] for y in range(25)]
+prData = [[0 for x in range(3)] for y in range(itemQty)]
 # data = [i for i in itertools.repeat(1, 5)]  Another way of generating a list
 
 def listCor(x,y,z): # Prices list editing
@@ -44,7 +52,7 @@ def listCor(x,y,z): # Prices list editing
     prData[x].insert(y,z)
 
 rowP = 9
-for i in range(25):
+for i in range(itemQty):
     bd = str(sh1.cell(row=rowP, column=1).value)
     name = sh1.cell(row=rowP, column=2).value
     bdList.append(bd)
@@ -164,19 +172,20 @@ def yearloopB33(yc, kd, st):  # Function that puts current value
         yc += 1
     # return yc
 
-
 for i in range(8, listLen_v1):
     init_stock = sh_v1.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
     bd_d = str(sh_v1.cell(row=i, column=1).value)
 
-    if '.' not in bd_d:
+    if '.' not in bd_d and bd_d in bdList:  # B/c we process only so many items
         yeda_c = 0
         kod = str(sh_v1.cell(row=i, column=1).value)
         # stockDict_B33[kod] = {}
         stock = init_stock
         yearloopB33(yeda_c, kod, stock)
+    elif bd_d not in bdList:
+        continue
     else:
         stock = sh_v1.cell(row=i, column=8).value
         if stock == ' ':
@@ -205,14 +214,7 @@ startY = 2000 + int(dateCell2[8:10])
 endD = int(dateCell2[14:16])
 endM = int(dateCell2[17:19])
 endY = 2000 + int(dateCell2[20:])
-"""
-startDate = DT.datetime(startY, startM, startD)
-endDate = DT.datetime(endY, endM, endD)
-yeda = pd.date_range( # Creating a list of dates of the year's period
-    min(startDate, endDate),
-    max(startDate, endDate)
-).strftime('%d.%m.%y').tolist()
-"""
+
 bdList4 = bdList[:]
 stockDict_BD1 = dict.fromkeys(bdList4, 0)
 
@@ -232,19 +234,20 @@ def yearloopBD1(yc, kd, st):  # Function that puts current value
         yc += 1
     # return yc
 
-
 for i in range(8, listLen_v2):
     init_stock = sh_v2.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
     bd_d = str(sh_v2.cell(row=i, column=1).value)
 
-    if '.' not in bd_d:
+    if '.' not in bd_d and bd_d in bdList:
         yeda_c = 0
         kod = str(sh_v2.cell(row=i, column=1).value)
         # stockDict_B33[kod] = {}
         stock = init_stock
         yearloopBD1(yeda_c, kod, stock)
+    elif bd_d not in bdList:
+        continue
     else:
         stock = sh_v2.cell(row=i, column=8).value
         if stock == ' ':
@@ -252,12 +255,10 @@ for i in range(8, listLen_v2):
         date_index = yeda.index(bd_d)
         yearloopBD1(date_index, kod, stock)
 
-
 wbv2.close()
 os.remove(filename_ved2 + 'V2.xlsx')
 
 # +++++++++++++++++++++++++++++++ BD3 +++++++++++++++++++++++++++++++
-
 
 filename_ved3=easygui.fileopenbox()
 df3 = pd.read_excel(filename_ved3, header=None)
@@ -295,19 +296,20 @@ def yearloopBD3(yc, kd, st):  # Function that puts current value
         yc += 1
     # return yc
 
-
 for i in range(8, listLen_v3):
     init_stock = sh_v3.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
     bd_d = str(sh_v3.cell(row=i, column=1).value)
 
-    if '.' not in bd_d:
+    if '.' not in bd_d and bd_d in bdList:
         yeda_c = 0
         kod = str(sh_v3.cell(row=i, column=1).value)
         # stockDict_B33[kod] = {}
         stock = init_stock
         yearloopBD3(yeda_c, kod, stock)
+    elif bd_d not in bdList:
+        continue
     else:
         stock = sh_v3.cell(row=i, column=8).value
         if stock == ' ':
@@ -356,19 +358,20 @@ def yearloopBD4(yc, kd, st):  # Function that puts current value
         yc += 1
     # return yc
 
-
 for i in range(8, listLen_v4):
     init_stock = sh_v4.cell(row=i, column=5).value
     if init_stock == ' ':
         init_stock = 0
     bd_d = str(sh_v4.cell(row=i, column=1).value)
 
-    if '.' not in bd_d:
+    if '.' not in bd_d and bd_d in bdList:
         yeda_c = 0
         kod = str(sh_v4.cell(row=i, column=1).value)
         # stockDict_B33[kod] = {}
         stock = init_stock
         yearloopBD4(yeda_c, kod, stock)
+    elif bd_d not in bdList:
+        continue
     else:
         stock = sh_v4.cell(row=i, column=8).value
         if stock == ' ':
@@ -378,7 +381,6 @@ for i in range(8, listLen_v4):
 
 wbv4.close()
 os.remove(filename_ved4 + 'V4.xlsx')
-
 
 
 # ++++++++++++++++++++++++++++++++++ Анализ продаж ++++++++++++++++++++++++++++
@@ -444,17 +446,10 @@ os.remove(filename_ved4 + 'V4.xlsx')
 
 # ============================== Exporting ========================
 
-# wbm = xw.Book('Дашборд Матрица 2.xlsx')
-# sh_dash = wbm.sheets['Лист1']
 
 dashboardFile = "Data1.xlsx"
 wbm = openpyxl.load_workbook(dashboardFile)
 sh_dash = wbm.active
-# dashboardFile = open('Дашборд Матрица 22.xlsx', 'a')
-
-# Making a list of sheets in the dashboard file
-
-
 
 # Exporting data
 
@@ -468,7 +463,6 @@ for i in bdList:
     sh_dash.cell(row=6, column=col+4).value = bdDict[i]['БД3'][2]
     sh_dash.cell(row=6, column=col+6).value = bdDict[i]['БД4'][2]
     col += 10
-
 
 col = 7
 for i in bdList:
@@ -515,7 +509,6 @@ for i in bdList:
     col += 10
 
 # ======================= Exporting sales data ==========================
-
 
 wbm.save('Data1.xlsx')
 wbm.close()
